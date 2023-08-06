@@ -1,4 +1,5 @@
 import { connect } from "amqplib";
+import { v4 as uuidv4} from 'uuid';
 
 const QUEUE_NAME = "run_code"
 
@@ -9,7 +10,7 @@ async function sendMessages() {
     await channel.assertQueue(QUEUE_NAME, { durable: false })
 
     for (let i = 0; i < 10; i++) {
-        let msg = JSON.stringify({ message: "Hello World!", messageId: i })
+        let msg = JSON.stringify({ jobID: uuidv4(), language: "python" })
 
         channel.sendToQueue(QUEUE_NAME, Buffer.from(msg), { persistent: true })
         console.log("Sent Message", i)

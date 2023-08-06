@@ -11,10 +11,12 @@
   "license": "MIT",
   "dependencies": {
     "amqplib": "^0.10.3",
+    "uuid": "^9.0.0",
     "winston": "^3.10.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/amqplib": "^0.10.1"
+    "@types/amqplib": "^0.10.1",
+    "@types/uuid": "^9.0.2"
   }
 }
