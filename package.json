@@ -10,7 +10,8 @@
   "author": "FusionSid",
   "license": "MIT",
   "dependencies": {
-    "amqplib": "^0.10.3"
+    "amqplib": "^0.10.3",
+    "winston": "^3.10.0"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.1"

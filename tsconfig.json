@@ -8,10 +8,9 @@
 		"strict": true /* Enable all strict type-checking options. */,
 		"skipLibCheck": true /* Skip type checking all .d.ts files. */,
 		"paths": {
-			"@*": ["./*"],
 			"@core": ["./core/*"],
 			"@types": ["./core/helpers/types"]
 		}
 	},
-	"include": ["**/*.ts"]
+	"include": ["**/*.ts", "*.ts"]
 }
