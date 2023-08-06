@@ -1,7 +1,7 @@
 import { connect, type Connection, type Channel } from "amqplib";
 import { createLogger, transports, format, type Logger } from "winston";
 
-import { type IGeneralRCEWorker } from "@types"
+import { type IGeneralRCEWorker, RunCodeJob } from "../helpers/types"
 
 export class GeneralRCEWorker implements IGeneralRCEWorker {
     readonly queueName: string;
@@ -46,17 +46,16 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
                 return;
             }
 
-            let payload: any;
-            try {
-                payload = JSON.parse(msg.content.toString())
-            } catch (error) {
+            let parsed = RunCodeJob.safeParse(JSON.parse(msg.content.toString()))
+            if (!parsed.success) {
                 return this.channel.ack(msg)
             }
 
-            this.logger.info("Recieved JSON Payload!", { jsonRecieved: payload })
+            let job = parsed.data
+            this.logger.info("Recieved JSON Payload!", { jsonRecieved: job })
 
             // pretending to do work
-            setTimeout(() => { this.logger.info(`Completed Task: ${payload.messageId}`); this.channel.ack(msg) }, 4000)
+            setTimeout(() => { this.logger.info(`Completed Task: ${job.jobID}`); this.channel.ack(msg) }, 4000)
         }, { noAck: false })
     }
 }

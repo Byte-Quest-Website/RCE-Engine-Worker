@@ -11,7 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "amqplib": "^0.10.3",
-    "winston": "^3.10.0"
+    "winston": "^3.10.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.1"
