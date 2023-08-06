@@ -1,0 +1,18 @@
+{
+  "name": "rce-engine-worker",
+  "version": "1.0.0",
+  "description": "This worker is a RabbitMQ consumer and will run any code given to it and save the result to the database",
+  "main": "build/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "FusionSid",
+  "license": "MIT",
+  "dependencies": {
+    "amqplib": "^0.10.3"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.1"
+  }
+}
