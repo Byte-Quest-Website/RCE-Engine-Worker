@@ -46,7 +46,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
                 return;
             }
 
-            let payload;
+            let payload: any;
             try {
                 payload = JSON.parse(msg.content.toString())
             } catch (error) {
@@ -56,7 +56,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
             this.logger.info("Recieved JSON Payload!", { jsonRecieved: payload })
 
             // pretending to do work
-            setTimeout(() => { this.logger.info("Completed Task!"); this.channel.ack(msg) }, 4000)
+            setTimeout(() => { this.logger.info(`Completed Task: ${payload.messageId}`); this.channel.ack(msg) }, 4000)
         }, { noAck: false })
     }
 }
