@@ -1,16 +1,20 @@
-import { file } from "tmp-promise"
-import { join } from "path"
-import { promises as fs } from 'fs';
+import { file } from "tmp-promise";
+import { join } from "path";
+import { promises as fs } from "fs";
 import { connect, type Connection, type Channel } from "amqplib";
 import { createLogger, transports, format, type Logger } from "winston";
-
 
 import {
     type IGeneralRCEWorker,
     RunCodeJob,
     RunCodeJobValidator,
 } from "../helpers/types";
-import { buildImage, imageExists, runCodeInContainer, cleanup } from "../helpers/docker";
+import {
+    buildImage,
+    imageExists,
+    runCodeInContainer,
+    cleanup,
+} from "../helpers/docker";
 import { Languages } from "../helpers/constants";
 
 export class GeneralRCEWorker implements IGeneralRCEWorker {
@@ -53,7 +57,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
     async start(): Promise<void> {
         this.logger.info("Worker Consuming Messages!");
 
-        await this.channel.prefetch(3)
+        await this.channel.prefetch(3);
 
         this.channel.consume(
             this.queueName,
@@ -82,27 +86,37 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
     }
 
     async processJob(job: RunCodeJob, callback: () => any) {
-        const { path, imageName, fileName, runScript } = Languages[job.language]
+        const { path, imageName, fileName, runScript } =
+            Languages[job.language];
 
-        if (!await imageExists(imageName)) {
-            await buildImage(imageName, job.language)
+        if (!(await imageExists(imageName))) {
+            await buildImage(imageName, job.language);
         }
 
         const codeFile = await file();
         const inputFile = await file();
 
+        await fs.writeFile(inputFile.path, job.input, "utf-8");
+        await fs.writeFile(codeFile.path, job.code, "utf-8");
 
-        await fs.writeFile(inputFile.path, job.input, "utf-8")
-        await fs.writeFile(codeFile.path, job.code, "utf-8")
+        const containerName = `${job.language}_${job.jobID}_${imageName}`;
 
-        const containerName = `${job.jobID}_${job.language}_${imageName}`
+        console.log(
+            await runCodeInContainer({
+                inputFileSrc: inputFile.path,
+                codeFileSrc: codeFile.path,
+                codeFileDes: fileName,
+                runFileSrc: join(path, "run.sh"),
+                runFileDes: runScript,
+                imageName: imageName,
+                containerName: containerName,
+            })
+        );
 
-        console.log(await runCodeInContainer({ inputFileSrc: inputFile.path, codeFileSrc: codeFile.path, codeFileDes: fileName, runFileSrc: join(path, "run.sh"), runFileDes: runScript, imageName: imageName, containerName: containerName }))
-
-        codeFile.cleanup()
+        codeFile.cleanup();
         inputFile.cleanup();
 
-        cleanup(containerName)
-        return callback()
+        cleanup(containerName);
+        return callback();
     }
 }

@@ -1,6 +1,6 @@
-import { join } from "path"
+import { join } from "path";
 
-export const CONFIG_DIR = join(__dirname, "..", "config")
+export const CONFIG_DIR = join(__dirname, "..", "config");
 
 export const Languages = {
     python: {
