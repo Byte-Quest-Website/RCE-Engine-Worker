@@ -14,7 +14,7 @@ export interface IGeneralRCEWorker {
 
 export const SupportedLanguages = z.union([
     z.literal("python"),
-    z.literal("python"),
+    z.literal("ricklang"),
 ]);
 
 export const RunCodeJobValidator = z.object({

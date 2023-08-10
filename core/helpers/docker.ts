@@ -1,6 +1,6 @@
 import { join } from "path";
-import { CONFIG_DIR } from "./constants";
 import { exec, spawn } from "child_process";
+import { CONFIG_DIR, LANGUAGE_DIR } from "./constants";
 
 import {
     RunCodeInfo,
@@ -57,7 +57,7 @@ export async function buildImage(
     language: string
 ): Promise<AsyncExecPromise> {
     const buildScript = join(CONFIG_DIR, "build.sh");
-    const filePath = join(CONFIG_DIR, language);
+    const filePath = join(LANGUAGE_DIR, language);
 
     return await asyncExecCode(`bash ${buildScript} ${imageName} ${filePath}`);
 }
@@ -66,7 +66,6 @@ export async function runCodeInContainer(
     data: RunCodeInfo
 ): Promise<RunCodeContainerResponse> {
     const runScript = join(CONFIG_DIR, "run.sh");
-
     await asyncExecCode(`chmod 644 ${data.codeFileSrc}`);
 
     const volume1 = `${data.codeFileSrc}:${data.codeFileDes}`;
