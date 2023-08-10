@@ -53,6 +53,8 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
     async start(): Promise<void> {
         this.logger.info("Worker Consuming Messages!");
 
+        await this.channel.prefetch(3)
+
         this.channel.consume(
             this.queueName,
             (msg) => {
