@@ -2,12 +2,12 @@
     "name": "rce-engine-worker",
     "version": "1.0.0",
     "description": "This worker is a RabbitMQ consumer and will run any code given to it and save the result to the database",
-    "main": "build/index.js",
+    "main": "dist/src/index.js",
     "scripts": {
         "watch": "npm run clean && tsc && npm run copy && tsc --watch",
-        "clean": "rm -rf ./build",
+        "clean": "rm -rf ./dist",
         "build": "npm run clean && tsc && npm run copy",
-        "copy": "cp -R ./core/config ./build/core/config"
+        "copy": "cp -R ./src/core/config ./dist/src/core/config"
     },
     "prisma": {
         "schema": "core/db/schema.prisma"
