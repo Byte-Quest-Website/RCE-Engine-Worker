@@ -7,15 +7,16 @@ export interface IGeneralRCEWorker {
     readonly connection: Connection;
     readonly channel: Channel;
     readonly logger: Logger;
+
     start: () => Promise<void>;
 }
 
-// use this when more languages are supported:
-// const SupportedLanguages = z.union([
-//     z.literal("python"),
-// ]);
+export const SupportedLanguages = z.union([z.literal("python"), z.literal("python")])
 
-export const RunCodeJob = z.object({
+export const RunCodeJobValidator = z.object({
     jobID: z.string().uuid(),
-    language: z.literal("python"),
+    language: SupportedLanguages,
+    code: z.string(),
 })
+
+export type RunCodeJob = z.infer<typeof RunCodeJobValidator>
