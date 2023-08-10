@@ -43,8 +43,7 @@ export async function buildImage(imageName: string, language: string): Promise<A
 export async function runCodeInContainer(data: RunCodeInfo): Promise<RunCodeContainerResponse> {
     const runScript = join(CONFIG_DIR, "run.sh")
 
-    await asyncExecCode(`chown 644 ${data.codeFileSrc}`)
-    await asyncExecCode(`chown 644 ${data.runFileSrc}`)
+    await asyncExecCode(`chmod 644 ${data.codeFileSrc}`)
 
     const volume1 = `${data.codeFileSrc}:${data.codeFileDes}`
     const volume2 = `${data.runFileSrc}:${data.runFileDes}`
