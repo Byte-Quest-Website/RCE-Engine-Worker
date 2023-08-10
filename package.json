@@ -4,7 +4,10 @@
   "description": "This worker is a RabbitMQ consumer and will run any code given to it and save the result to the database",
   "main": "build/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "npm run clean && tsc && npm run copy && tsc --watch",
+    "clean": "rm -rf ./build",
+    "build": "npm run clean && tsc && npm run copy",
+    "copy": "cp -R ./core/config ./build/core/config"
   },
   "keywords": [],
   "author": "FusionSid",
@@ -17,6 +20,7 @@
   },
   "devDependencies": {
     "@types/amqplib": "^0.10.1",
-    "@types/uuid": "^9.0.2"
+    "@types/uuid": "^9.0.2",
+    "copyfiles": "^2.4.1"
   }
 }
