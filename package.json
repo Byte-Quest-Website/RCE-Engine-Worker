@@ -9,10 +9,14 @@
     "build": "npm run clean && tsc && npm run copy",
     "copy": "cp -R ./core/config ./build/core/config"
   },
+  "prisma": {
+    "schema": "core/db/schema.prisma"
+  },
   "keywords": [],
   "author": "FusionSid",
   "license": "MIT",
   "dependencies": {
+    "@prisma/client": "^3.13.0",
     "amqplib": "^0.10.3",
     "tmp-promise": "^3.0.3",
     "uuid": "^9.0.0",
@@ -22,6 +26,7 @@
   "devDependencies": {
     "@types/amqplib": "^0.10.1",
     "@types/uuid": "^9.0.2",
-    "copyfiles": "^2.4.1"
+    "copyfiles": "^2.4.1",
+    "prisma": "^5.1.1"
   }
 }
