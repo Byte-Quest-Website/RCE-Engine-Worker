@@ -83,10 +83,12 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
 
                 let job: RunCodeJob = parsed.data;
 
+                this.redis.set(`${job.jobID}-status`, "processing")
                 this.logger.info(`Recieved Task: ${job.jobID}`);
 
                 this.processJob(job, (response) => {
                     this.logger.info(`Completed Task: ${job.jobID}`);
+                    this.redis.set(`${job.jobID}-status`, "complete")
 
                     if (job.replyBack) {
                         this.channel.sendToQueue(
