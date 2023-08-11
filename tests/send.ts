@@ -2,11 +2,10 @@ import { join } from "path";
 import { readFileSync } from "fs";
 import { connect } from "amqplib";
 import { v4 as uuidv4 } from "uuid";
-import { EventEmitter } from "events"
+import { EventEmitter } from "events";
 
 const QUEUE_NAME = "run_code";
-const REPLY_QUEUE = 'amq.rabbitmq.reply-to';
-
+const REPLY_QUEUE = "amq.rabbitmq.reply-to";
 
 async function sendMessages() {
     const connection = await connect("amqp://localhost");
@@ -19,16 +18,16 @@ async function sendMessages() {
 
     channel.consume(
         REPLY_QUEUE,
-        msg => {
+        (msg) => {
             if (!msg) {
-                return
+                return;
             }
             responseEmitter.emit(
                 msg.properties.correlationId,
-                msg.content.toString('utf8'),
+                msg.content.toString("utf8")
             );
         },
-        { noAck: true },
+        { noAck: true }
     );
 
     let pythonCode = readFileSync(join(__dirname, "code.py")).toString();
@@ -42,18 +41,18 @@ async function sendMessages() {
         language: "python",
         code: pythonCode,
         input: inputString,
-        replyBack: true
+        replyBack: true,
     });
-    let res = await new Promise(resolve => {
+    let res = await new Promise((resolve) => {
         const correlationId = uuidv4();
         responseEmitter.once(correlationId, resolve);
         channel.sendToQueue(QUEUE_NAME, Buffer.from(msg1), {
             correlationId,
             replyTo: REPLY_QUEUE,
-            persistent: true
+            persistent: true,
         });
     });
-    console.log("Response", res)
+    console.log("Response", res);
 
     let msg2 = JSON.stringify({
         jobID: uuidv4(),

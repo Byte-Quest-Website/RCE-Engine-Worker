@@ -1,7 +1,7 @@
 import { join } from "path";
 import { file } from "tmp-promise";
 import { promises as fs } from "fs";
-import { createClient } from "redis"
+import { createClient } from "redis";
 import { connect, type Connection, type Channel } from "amqplib";
 import { createLogger, transports, format, type Logger } from "winston";
 
@@ -9,7 +9,7 @@ import {
     type IGeneralRCEWorker,
     RunCodeJob,
     RunCodeJobValidator,
-    RunCodeContainerResponse
+    RunCodeContainerResponse,
 } from "../helpers/types";
 import {
     buildImage,
@@ -46,7 +46,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
         const channel = await connection.createChannel();
         await channel.assertQueue(queueName, { durable: false });
 
-        const redisClient = createClient({ url: process.env.REDIS_URL })
+        const redisClient = createClient({ url: process.env.REDIS_URL });
         await redisClient.connect();
 
         const logger = createLogger({
@@ -59,7 +59,13 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
 
         logger.info("Worker Waiting For Messages!");
 
-        return new GeneralRCEWorker(queueName, connection, channel, logger, redisClient);
+        return new GeneralRCEWorker(
+            queueName,
+            connection,
+            channel,
+            logger,
+            redisClient
+        );
     }
 
     async start(): Promise<void> {
@@ -69,7 +75,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
 
         this.channel.consume(
             this.queueName,
-            (msg) => {
+            async (msg) => {
                 if (msg === null) {
                     return;
                 }
@@ -83,12 +89,12 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
 
                 let job: RunCodeJob = parsed.data;
 
-                this.redis.set(`${job.jobID}-status`, "processing")
+                await this.redis.set(`${job.jobID}-status`, "processing");
                 this.logger.info(`Recieved Task: ${job.jobID}`);
 
-                this.processJob(job, (response) => {
+                this.processJob(job, async (response) => {
                     this.logger.info(`Completed Task: ${job.jobID}`);
-                    this.redis.set(`${job.jobID}-status`, "complete")
+                    await this.redis.set(`${job.jobID}-status`, "complete");
 
                     if (job.replyBack) {
                         this.channel.sendToQueue(
@@ -96,7 +102,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
                             Buffer.from(JSON.stringify(response)),
                             {
                                 correlationId: msg.properties.correlationId,
-                            },
+                            }
                         );
                     }
 
@@ -107,7 +113,10 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
         );
     }
 
-    async processJob(job: RunCodeJob, callback: (response: RunCodeContainerResponse) => any) {
+    async processJob(
+        job: RunCodeJob,
+        callback: (response: RunCodeContainerResponse) => any
+    ) {
         const { path, imageName, fileName, runScript } =
             Languages[job.language];
 
@@ -131,12 +140,14 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
             runFileDes: runScript,
             imageName: imageName,
             containerName: containerName,
-        })
+        });
 
         codeFile.cleanup();
         inputFile.cleanup();
 
         cleanup(containerName);
-        return callback(response);
+        return callback.constructor.name === "AsyncFunction"
+            ? await callback(response)
+            : callback(response);
     }
 }

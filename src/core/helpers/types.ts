@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createClient } from "redis"
+import { createClient } from "redis";
 import { type Logger } from "winston";
 import { type ExecException } from "child_process";
 import { type Connection, type Channel } from "amqplib";
@@ -24,7 +24,7 @@ export const RunCodeJobValidator = z.object({
     language: SupportedLanguages,
     code: z.string(),
     input: z.string(),
-    replyBack: z.boolean().default(false)
+    replyBack: z.boolean().default(false),
 });
 
 export type RunCodeJob = z.infer<typeof RunCodeJobValidator>;
