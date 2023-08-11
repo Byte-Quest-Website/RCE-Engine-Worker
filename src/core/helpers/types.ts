@@ -24,6 +24,7 @@ export const RunCodeJobValidator = z.object({
     language: SupportedLanguages,
     code: z.string(),
     input: z.string(),
+    replyBack: z.boolean().default(false)
 });
 
 export type RunCodeJob = z.infer<typeof RunCodeJobValidator>;

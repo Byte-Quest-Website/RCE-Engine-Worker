@@ -9,6 +9,7 @@ import {
     type IGeneralRCEWorker,
     RunCodeJob,
     RunCodeJobValidator,
+    RunCodeContainerResponse
 } from "../helpers/types";
 import {
     buildImage,
@@ -76,15 +77,27 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
                 let parsed = RunCodeJobValidator.safeParse(
                     JSON.parse(msg.content.toString())
                 );
-
                 if (!parsed.success) {
                     return this.channel.ack(msg);
                 }
+
                 let job: RunCodeJob = parsed.data;
+
                 this.logger.info(`Recieved Task: ${job.jobID}`);
 
-                this.processJob(job, () => {
+                this.processJob(job, (response) => {
                     this.logger.info(`Completed Task: ${job.jobID}`);
+
+                    if (job.replyBack) {
+                        this.channel.sendToQueue(
+                            msg.properties.replyTo,
+                            Buffer.from(JSON.stringify(response)),
+                            {
+                                correlationId: msg.properties.correlationId,
+                            },
+                        );
+                    }
+
                     this.channel.ack(msg);
                 });
             },
@@ -92,7 +105,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
         );
     }
 
-    async processJob(job: RunCodeJob, callback: () => any) {
+    async processJob(job: RunCodeJob, callback: (response: RunCodeContainerResponse) => any) {
         const { path, imageName, fileName, runScript } =
             Languages[job.language];
 
@@ -108,22 +121,20 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
 
         const containerName = `${job.language}_${job.jobID}_${imageName}`;
 
-        console.log(
-            await runCodeInContainer({
-                inputFileSrc: inputFile.path,
-                codeFileSrc: codeFile.path,
-                codeFileDes: fileName,
-                runFileSrc: join(path, "run.sh"),
-                runFileDes: runScript,
-                imageName: imageName,
-                containerName: containerName,
-            })
-        );
+        let response = await runCodeInContainer({
+            inputFileSrc: inputFile.path,
+            codeFileSrc: codeFile.path,
+            codeFileDes: fileName,
+            runFileSrc: join(path, "run.sh"),
+            runFileDes: runScript,
+            imageName: imageName,
+            containerName: containerName,
+        })
 
         codeFile.cleanup();
         inputFile.cleanup();
 
         cleanup(containerName);
-        return callback();
+        return callback(response);
     }
 }
