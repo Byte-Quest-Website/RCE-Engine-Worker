@@ -1,6 +1,7 @@
-import { file } from "tmp-promise";
 import { join } from "path";
+import { file } from "tmp-promise";
 import { promises as fs } from "fs";
+import { createClient } from "redis"
 import { connect, type Connection, type Channel } from "amqplib";
 import { createLogger, transports, format, type Logger } from "winston";
 
@@ -22,17 +23,20 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
     readonly connection: Connection;
     readonly channel: Channel;
     readonly logger: Logger;
+    readonly redis: ReturnType<typeof createClient>;
 
     constructor(
         queueName: string,
         connection: Connection,
         channel: Channel,
-        logger: Logger
+        logger: Logger,
+        redis: ReturnType<typeof createClient>
     ) {
         this.queueName = queueName;
         this.connection = connection;
         this.channel = channel;
         this.logger = logger;
+        this.redis = redis;
     }
 
     static async init(queueName: string): Promise<GeneralRCEWorker> {
@@ -40,6 +44,9 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
 
         const channel = await connection.createChannel();
         await channel.assertQueue(queueName, { durable: false });
+
+        const redisClient = createClient({ url: process.env.REDIS_URL })
+        await redisClient.connect();
 
         const logger = createLogger({
             format: format.combine(format.timestamp(), format.prettyPrint()),
@@ -51,7 +58,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
 
         logger.info("Worker Waiting For Messages!");
 
-        return new GeneralRCEWorker(queueName, connection, channel, logger);
+        return new GeneralRCEWorker(queueName, connection, channel, logger, redisClient);
     }
 
     async start(): Promise<void> {

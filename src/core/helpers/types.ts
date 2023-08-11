@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createClient } from "redis"
 import { type Logger } from "winston";
 import { type ExecException } from "child_process";
 import { type Connection, type Channel } from "amqplib";
@@ -8,6 +9,7 @@ export interface IGeneralRCEWorker {
     readonly connection: Connection;
     readonly channel: Channel;
     readonly logger: Logger;
+    readonly redis: ReturnType<typeof createClient>;
 
     start: () => Promise<void>;
 }
