@@ -1,3 +1,6 @@
+# This folder is the source for the image `fusionsid/testpy`
+# In the future I will just use that as it is prebuilt on docker hub
+
 FROM python:alpine
 
 WORKDIR /tmp
