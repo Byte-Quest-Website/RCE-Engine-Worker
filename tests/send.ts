@@ -91,6 +91,25 @@ async function sendMessages() {
     });
     console.log("Response", res3);
 
+    let cCode = readFileSync(join(__dirname, "code.c")).toString();
+    let msg4 = JSON.stringify({
+        jobID: uuidv4(),
+        language: "c",
+        code: cCode,
+        input: inputString,
+        replyBack: true,
+    });
+    let res4: string = await new Promise((resolve) => {
+        const correlationId = uuidv4();
+        responseEmitter.once(correlationId, resolve);
+        channel.sendToQueue(QUEUE_NAME, Buffer.from(msg4), {
+            correlationId,
+            replyTo: REPLY_QUEUE,
+            persistent: true,
+        });
+    });
+    console.log("Response", res4);
+
     console.log("Sent All Messages");
     setTimeout(() => connection.close(), 1000);
 }

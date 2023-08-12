@@ -22,4 +22,10 @@ export const Languages = {
         fileName: "/tmp/code.js",
         runScript: "/tmp/run.sh",
     },
+    c: {
+        path: join(LANGUAGE_DIR, "c"),
+        imageName: "cexe",
+        fileName: "/tmp/main.c",
+        runScript: "/tmp/run.sh",
+    }
 } as const;

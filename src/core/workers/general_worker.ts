@@ -121,6 +121,7 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
             Languages[job.language];
 
         if (!(await imageExists(imageName))) {
+            this.logger.info(`Building Image: ${imageName}`);
             await buildImage(imageName, job.language);
         }
 

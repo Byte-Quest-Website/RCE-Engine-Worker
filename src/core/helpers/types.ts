@@ -18,6 +18,7 @@ export const SupportedLanguages = z.union([
     z.literal("python"),
     z.literal("ricklang"),
     z.literal("node"),
+    z.literal("c"),
 ]);
 
 export const RunCodeJobValidator = z.object({

@@ -1,4 +1,4 @@
-sudo timeout -s SIGKILL 5 \
+sudo timeout -s SIGKILL 50 \
     docker run -a stdin -a stdout -a stderr \
     -i --read-only --network=none --memory=25mb \
     --tmpfs /tmp:exec \
