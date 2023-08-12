@@ -30,12 +30,9 @@ async function sendMessages() {
         { noAck: true }
     );
 
-    let pythonCode = readFileSync(join(__dirname, "code.py")).toString();
-    let ricklangCode = readFileSync(
-        join(__dirname, "code.rickroll")
-    ).toString();
     let inputString = readFileSync(join(__dirname, "input.txt")).toString();
 
+    let pythonCode = readFileSync(join(__dirname, "code.py")).toString();
     let msg1 = JSON.stringify({
         jobID: uuidv4(),
         language: "python",
@@ -43,7 +40,7 @@ async function sendMessages() {
         input: inputString,
         replyBack: true,
     });
-    let res = await new Promise((resolve) => {
+    let res1 = await new Promise((resolve) => {
         const correlationId = uuidv4();
         responseEmitter.once(correlationId, resolve);
         channel.sendToQueue(QUEUE_NAME, Buffer.from(msg1), {
@@ -52,15 +49,47 @@ async function sendMessages() {
             persistent: true,
         });
     });
-    console.log("Response", res);
+    console.log("Response", res1);
 
+    let ricklangCode = readFileSync(
+        join(__dirname, "code.rickroll")
+    ).toString();
     let msg2 = JSON.stringify({
         jobID: uuidv4(),
         language: "ricklang",
         code: ricklangCode,
         input: inputString,
+        replyBack: true,
     });
-    channel.sendToQueue(QUEUE_NAME, Buffer.from(msg2), { persistent: true });
+    let res2 = await new Promise((resolve) => {
+        const correlationId = uuidv4();
+        responseEmitter.once(correlationId, resolve);
+        channel.sendToQueue(QUEUE_NAME, Buffer.from(msg2), {
+            correlationId,
+            replyTo: REPLY_QUEUE,
+            persistent: true,
+        });
+    });
+    console.log("Response", res2);
+
+    let nodeCode = readFileSync(join(__dirname, "code.js")).toString();
+    let msg3 = JSON.stringify({
+        jobID: uuidv4(),
+        language: "node",
+        code: nodeCode,
+        input: inputString,
+        replyBack: true,
+    });
+    let res3 = await new Promise((resolve) => {
+        const correlationId = uuidv4();
+        responseEmitter.once(correlationId, resolve);
+        channel.sendToQueue(QUEUE_NAME, Buffer.from(msg3), {
+            correlationId,
+            replyTo: REPLY_QUEUE,
+            persistent: true,
+        });
+    });
+    console.log("Response", res3);
 
     console.log("Sent All Messages");
     setTimeout(() => connection.close(), 1000);

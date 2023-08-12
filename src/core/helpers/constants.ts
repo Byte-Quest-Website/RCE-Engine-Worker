@@ -16,4 +16,10 @@ export const Languages = {
         fileName: "/code.rickroll",
         runScript: "/run.sh",
     },
+    node: {
+        path: join(LANGUAGE_DIR, "node"),
+        imageName: "nodeexe",
+        fileName: "/tmp/code.js",
+        runScript: "/tmp/run.sh",
+    },
 } as const;
