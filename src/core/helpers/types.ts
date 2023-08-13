@@ -49,7 +49,8 @@ export type RunCodeContainerResponse = {
     stderr: string;
     exitCode: number;
     executionTime: number;
-    memoryKilled: boolean;
+    outOfMemory: boolean;
+    timedOut: boolean;
 };
 
 export type AsyncExecPromise = {

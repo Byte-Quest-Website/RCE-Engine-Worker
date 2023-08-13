@@ -89,13 +89,20 @@ export async function runCodeInContainer(
 
         childProcess.on("close", async (code) => {
             const executionTime = await getExecutionTime(data.containerName);
-            const memoryKilled = await getMemoryKilled(data.containerName);
+            const outOfMemory = await getMemoryKilled(data.containerName);
+            const exitCode = code ?? 0;
+            const timedOut =
+                stderr.includes("sudo timeout -s SIGKILL") &&
+                exitCode == 137 &&
+                !outOfMemory;
+
             resolve({
                 stdout: stdout,
                 stderr: stderr,
-                exitCode: code ?? 0,
+                exitCode,
                 executionTime,
-                memoryKilled,
+                outOfMemory,
+                timedOut,
             });
         });
     });
