@@ -2,7 +2,12 @@ import { join } from "path";
 import { exec, spawn } from "child_process";
 import { CONFIG_DIR, LANGUAGE_DIR } from "./constants";
 
-import { RunCodeInfo, ContainerResponse, AsyncExecPromise } from "./types";
+import {
+    RunCodeInfo,
+    ContainerResponse,
+    AsyncExecPromise,
+    TestCodeInfo,
+} from "./types";
 
 async function asyncExecCode(command: string): Promise<AsyncExecPromise> {
     return new Promise(function (resolve, reject) {
@@ -72,6 +77,51 @@ export async function runCodeInContainer(
 
     const command = `bash ${runScript} ${TIME_LIMIT} ${MEMORY_LIMIT} ${volume1} ${volume2} ${data.containerName} ${data.imageName} ${data.inputFileSrc}`;
 
+    return new Promise((resolve, reject) => {
+        const childProcess = spawn(command, { shell: true });
+
+        let stdout = "";
+        let stderr = "";
+
+        childProcess.stdout.on("data", (data) => (stdout += data));
+        childProcess.stderr.on("data", (data) => (stderr += data));
+
+        childProcess.on("error", (error) => reject({ error, stderr }));
+
+        childProcess.on("close", async (code) => {
+            const executionTime = await getExecutionTime(data.containerName);
+            const outOfMemory = await getMemoryKilled(data.containerName);
+            const exitCode = code ?? 0;
+            const timedOut =
+                stderr.includes("sudo timeout -s SIGKILL") &&
+                exitCode == 137 &&
+                !outOfMemory;
+
+            resolve({
+                stdout: stdout,
+                stderr: stderr,
+                exitCode,
+                executionTime,
+                outOfMemory,
+                timedOut,
+            });
+        });
+    });
+}
+
+export async function TestCodeInContainer(
+    data: TestCodeInfo,
+    time_limit: number,
+    memory_limit: string
+): Promise<ContainerResponse> {
+    const runScript = join(CONFIG_DIR, "test.sh");
+    await asyncExecCode(`chmod 644 ${data.codeFileSrc}`);
+
+    const volume1 = `${data.codeFileSrc}:/tmp/code.py`;
+    const volume2 = `${data.dataFileSrc}:/tmp/data.json`;
+
+    const command = `bash ${runScript} ${time_limit} ${memory_limit} ${volume1} ${volume2} ${data.containerName}`;
+    console.log(command);
     return new Promise((resolve, reject) => {
         const childProcess = spawn(command, { shell: true });
 

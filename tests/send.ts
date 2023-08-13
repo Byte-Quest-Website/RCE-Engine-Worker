@@ -13,10 +13,27 @@ async function sendMessages() {
 
     await channel.assertQueue(QUEUE_NAME, { durable: false });
 
+    const channel2 = await connection.createChannel();
+    await channel2.assertQueue("test_code", { durable: false });
+
     let responseEmitter = new EventEmitter();
     responseEmitter.setMaxListeners(0);
 
     channel.consume(
+        REPLY_QUEUE,
+        (msg) => {
+            if (!msg) {
+                return;
+            }
+            responseEmitter.emit(
+                msg.properties.correlationId,
+                msg.content.toString("utf8")
+            );
+        },
+        { noAck: true }
+    );
+
+    channel2.consume(
         REPLY_QUEUE,
         (msg) => {
             if (!msg) {
@@ -109,6 +126,25 @@ async function sendMessages() {
         });
     });
     console.log("Response", res4);
+
+    let tcodeCode = readFileSync(join(__dirname, "test.py")).toString();
+    let tdataCode = readFileSync(join(__dirname, "data.json")).toString();
+    let msg5 = JSON.stringify({
+        jobID: uuidv4(),
+        code: tcodeCode,
+        data: tdataCode,
+        replyBack: true,
+    });
+    let res5: string = await new Promise((resolve) => {
+        const correlationId = uuidv4();
+        responseEmitter.once(correlationId, resolve);
+        channel2.sendToQueue("test_code", Buffer.from(msg5), {
+            correlationId,
+            replyTo: REPLY_QUEUE,
+            persistent: true,
+        });
+    });
+    console.log("Response", res5);
 
     console.log("Sent All Messages");
     setTimeout(() => connection.close(), 1000);

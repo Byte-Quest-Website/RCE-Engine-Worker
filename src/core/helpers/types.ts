@@ -65,3 +65,18 @@ export const TestCodeJobValidator = z.object({
 });
 
 export type TestCodeJob = z.infer<typeof TestCodeJobValidator>;
+
+export type TestCodeInfo = {
+    codeFileSrc: string;
+    dataFileSrc: string;
+    containerName: string;
+};
+
+type Test = [any[], any];
+
+export type TestCodeData = {
+    time_limit: number;
+    memory_limit: number;
+    function_name: string;
+    tests: Test[];
+};
