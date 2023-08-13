@@ -2,9 +2,16 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-// placeholder default for now
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Job {
+  id          String    @id @unique @default(uuid())
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+  success     Boolean?
+  report      Json?
 }
