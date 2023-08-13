@@ -1,5 +1,5 @@
-from json import dump
 from typing import Any
+from json import dump, load
 from os.path import join, dirname
 
 import pytest
@@ -7,10 +7,25 @@ from pytest_jsonreport.plugin import JSONReport
 
 PATH = join(dirname(__file__), "test.py")
 RESULT_PATH = join(dirname(__file__), "result.json")
+TEST_CONFIG_PATH = join(dirname(__file__), "data.json")
+
+with open(TEST_CONFIG_PATH) as f:
+    test_config = load(f)
+
+TEST_CASES = test_config["tests"]
+TIME_LIMIT = test_config["time_limit"]
 
 plugin = JSONReport()
 pytest.main(
-    ["-v", "-rx", "--lf", "--tb=long", "--timeout=1", "--json-report-file=none", PATH],
+    [
+        "-v",
+        "-rx",
+        "--lf",
+        "--tb=long",
+        f"--timeout={TIME_LIMIT}",
+        "--json-report-file=none",
+        PATH,
+    ],
     plugins=[plugin],
 )
 
@@ -37,8 +52,12 @@ def main() -> None:
         reason = test["call"]["crash"]["message"]
         if test["call"]["traceback"][0]["message"] == "AssertionError":
             reason = "AssertionError"
+
         data["outcome"] = "fail"
         data["reason"] = reason
+        data["fail_number"] = idx
+        data["total_cases"] = len(TEST_CASES)
+
         break
     else:
         data["outcome"] = "pass"

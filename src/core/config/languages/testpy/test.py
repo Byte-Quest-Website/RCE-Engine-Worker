@@ -8,6 +8,7 @@ import code
 
 
 class JSONData(TypedDict):
+    time_limit: int
     function_name: str
     tests: list[tuple[list[Any], Any]]
 
