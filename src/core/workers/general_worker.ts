@@ -19,7 +19,7 @@ import { Languages } from "../helpers/constants";
 
 export class GeneralRCEWorker extends Worker implements IWorker {
     async start(): Promise<void> {
-        this.logger.info("Worker Consuming Messages!");
+        this.logger.info("General Worker Consuming Messages!");
 
         await this.channel.prefetch(3);
 

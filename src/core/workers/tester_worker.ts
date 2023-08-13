@@ -13,7 +13,7 @@ import { TestCodeInContainer, cleanup } from "../helpers/docker";
 
 export class TestCodeWorker extends Worker implements IWorker {
     async start(): Promise<void> {
-        this.logger.info("Worker Consuming Messages!");
+        this.logger.info("Test Worker Consuming Messages!");
 
         await this.channel.prefetch(3);
 
