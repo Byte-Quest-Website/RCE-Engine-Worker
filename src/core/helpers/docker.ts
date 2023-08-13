@@ -121,7 +121,7 @@ export async function TestCodeInContainer(
     const volume2 = `${data.dataFileSrc}:/tmp/data.json`;
 
     const command = `bash ${runScript} ${time_limit} ${memory_limit} ${volume1} ${volume2} ${data.containerName}`;
-    console.log(command);
+
     return new Promise((resolve, reject) => {
         const childProcess = spawn(command, { shell: true });
 
