@@ -47,6 +47,7 @@ async function sendMessages() {
             persistent: true,
         });
     });
+
     console.log("Response", JSON.parse(JSON.parse(res)["stdout"]));
 
     setTimeout(() => connection.close(), 1000);

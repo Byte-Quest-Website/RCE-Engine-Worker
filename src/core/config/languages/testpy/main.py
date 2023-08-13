@@ -1,3 +1,5 @@
+import sqlite3
+import humanize
 from typing import Any
 from json import dump, load
 from os.path import join, dirname
@@ -6,6 +8,7 @@ import pytest
 from pytest_jsonreport.plugin import JSONReport
 
 PATH = join(dirname(__file__), "test.py")
+PYMON_PATH = join(dirname(__file__), ".pymon")
 RESULT_PATH = join(dirname(__file__), "result.json")
 TEST_CONFIG_PATH = join(dirname(__file__), "data.json")
 
@@ -50,6 +53,7 @@ def main() -> None:
     for idx, test in enumerate(tests, start=1):
         if test["outcome"] != "failed":
             continue
+
         reason = test["call"]["crash"]["message"]
         if test["call"]["traceback"][0]["message"] == "AssertionError":
             reason = "AssertionError"
@@ -59,9 +63,30 @@ def main() -> None:
         data["fail_number"] = idx
         data["total_cases"] = len(TEST_CASES)
 
-        break
-    else:
-        data["outcome"] = "pass"
+        return write_result(data)
+
+    data["outcome"] = "pass"
+
+    connection = sqlite3.connect(PYMON_PATH)
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT MEM_USAGE FROM TEST_METRICS")
+    memory_usage_data = cursor.fetchall()[-len(TEST_CASES) :]
+    average_memory_used = sum(map(lambda x: abs(x[0] * 1e6), memory_usage_data)) / len(
+        memory_usage_data
+    )
+
+    cursor.execute("SELECT TOTAL_TIME FROM TEST_METRICS")
+    time_usage_data = cursor.fetchall()[-len(TEST_CASES) :]
+    average_time_spent = sum(map(lambda x: x[0], time_usage_data)) / len(
+        time_usage_data
+    )
+
+    data["average_time"] = average_time_spent
+    data["memory_used"] = int(average_memory_used)
+    data["memory_used_fmt"] = humanize.naturalsize(average_memory_used)
+
+    connection.close()
 
     return write_result(data)
 

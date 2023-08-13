@@ -1,10 +1,10 @@
 {
     "function_name": "eeee",
     "time_limit": 3,
-    "memory_limit": 25,
+    "memory_limit": 50,
     "tests": [
         [["Hello"], "Hello"],
-        [["Hello"], "Helleeo"],
+        [["Hello"], "Helleo"],
         [["Hello"], "Hello"],
         [["Hello"], "Hello"]
     ]
