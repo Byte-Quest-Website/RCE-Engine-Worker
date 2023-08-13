@@ -11,7 +11,7 @@
         "copy": "cp -R ./src/core/config ./dist/src/core/config"
     },
     "prisma": {
-        "schema": "core/db/schema.prisma"
+        "schema": "./src/core/db/schema.prisma"
     },
     "keywords": [],
     "author": "FusionSid",
