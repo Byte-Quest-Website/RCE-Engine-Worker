@@ -65,13 +65,16 @@ export async function buildImage(
 export async function runCodeInContainer(
     data: RunCodeInfo
 ): Promise<RunCodeContainerResponse> {
+    const TIME_LIMIT = 5;
+    const MEMORY_LIMIT = "25mb";
+
     const runScript = join(CONFIG_DIR, "run.sh");
     await asyncExecCode(`chmod 644 ${data.codeFileSrc}`);
 
     const volume1 = `${data.codeFileSrc}:${data.codeFileDes}`;
     const volume2 = `${data.runFileSrc}:${data.runFileDes}`;
 
-    const command = `bash ${runScript} ${volume1} ${volume2} ${data.containerName} ${data.imageName} ${data.inputFileSrc}`;
+    const command = `bash ${runScript} ${TIME_LIMIT} ${MEMORY_LIMIT} ${volume1} ${volume2} ${data.containerName} ${data.imageName} ${data.inputFileSrc}`;
 
     return new Promise((resolve, reject) => {
         const childProcess = spawn(command, { shell: true });
