@@ -10,9 +10,12 @@ import {
     TestCodeData,
 } from "../helpers/types";
 import { TestCodeInContainer, cleanup } from "../helpers/docker";
+import { PrismaClient, Prisma } from "@prisma/client";
 
 export class TestCodeWorker extends Worker implements IWorker {
     async start(): Promise<void> {
+        const prisma = new PrismaClient();
+
         this.logger.info("Test Worker Consuming Messages!");
 
         await this.channel.prefetch(3);
@@ -24,26 +27,34 @@ export class TestCodeWorker extends Worker implements IWorker {
                     return;
                 }
 
-                let parsed = TestCodeJobValidator.safeParse(
-                    JSON.parse(msg.content.toString())
-                );
+                let parsed_job;
+                try {
+                    parsed_job = JSON.parse(msg.content.toString());
+                } catch {
+                    return this.channel.ack(msg);
+                }
+                let parsed = TestCodeJobValidator.safeParse(parsed_job);
                 if (!parsed.success) {
                     return this.channel.ack(msg);
                 }
 
                 let job: TestCodeJob = parsed.data;
 
-                await this.redis.set(`${job.jobID}-status`, "processing");
+                await prisma.job.create({ data: { id: job.jobID } });
+                await this.redis.set(`${job.jobID}-complete`, "false");
                 this.logger.info(`Recieved Task: ${job.jobID}`);
 
                 this.processJob(job, async (response) => {
                     this.logger.info(`Completed Task: ${job.jobID}`);
-                    await this.redis.set(`${job.jobID}-status`, "complete");
+                    await this.redis.set(`${job.jobID}-complete`, "true");
+
+                    const jsonResponse = JSON.stringify(response);
+                    await this.updateDatabase(prisma, job, response);
 
                     if (job.replyBack) {
                         this.channel.sendToQueue(
                             msg.properties.replyTo,
-                            Buffer.from(JSON.stringify(response)),
+                            Buffer.from(jsonResponse),
                             {
                                 correlationId: msg.properties.correlationId,
                             }
@@ -86,5 +97,54 @@ export class TestCodeWorker extends Worker implements IWorker {
         return callback.constructor.name === "AsyncFunction"
             ? await callback(response)
             : callback(response);
+    }
+
+    async updateDatabase(
+        prisma: PrismaClient,
+        job: TestCodeJob,
+        response: ContainerResponse
+    ) {
+        let data = {
+            completed: true,
+            completedAt: new Date(),
+            success: true,
+        };
+
+        if (response.exitCode != 0 || response.stdout === "") {
+            data.success = false;
+        }
+
+        let container_parsed_res;
+        try {
+            container_parsed_res = JSON.parse(response.stdout);
+            delete container_parsed_res["report"];
+            response.stdout = JSON.stringify(container_parsed_res);
+        } catch {
+            data.success = false;
+        }
+
+        if (container_parsed_res["success"] !== true) {
+            data.success = false;
+        }
+
+        if (response.outOfMemory) {
+            response.stdout = JSON.stringify({
+                success: true,
+                outcome: "fail",
+                reason: "Failed: Out Of Memory",
+            });
+        }
+
+        await prisma.job.update({
+            where: {
+                id: job.jobID,
+            },
+            data: {
+                completed: true,
+                completedAt: new Date(),
+                report: container_parsed_res as Prisma.JsonObject,
+                success: true,
+            },
+        });
     }
 }

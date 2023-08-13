@@ -17,7 +17,7 @@
     "author": "FusionSid",
     "license": "MIT",
     "dependencies": {
-        "@prisma/client": "^3.13.0",
+        "@prisma/client": "^3.15.2",
         "amqplib": "^0.10.3",
         "dotenv": "^16.3.1",
         "redis": "^4.6.7",
