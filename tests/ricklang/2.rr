@@ -1,0 +1,5 @@
+take me to ur heart
+    we know the sys and we're gonna play it
+    give count up int(sys.stdin.readline())
+    i just wanna tell u how im feeling count * "Hi " + "\n"
+say goodbye
