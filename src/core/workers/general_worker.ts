@@ -40,7 +40,9 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
         this.redis = redis;
     }
 
-    static async init(queueName: string): Promise<GeneralRCEWorker> {
+    static async init<T extends GeneralRCEWorker>(
+        queueName: string
+    ): Promise<T> {
         const connection = await connect("amqp://localhost");
 
         const channel = await connection.createChannel();
@@ -59,13 +61,13 @@ export class GeneralRCEWorker implements IGeneralRCEWorker {
 
         logger.info("Worker Waiting For Messages!");
 
-        return new GeneralRCEWorker(
+        return new this(
             queueName,
             connection,
             channel,
             logger,
             redisClient
-        );
+        ) as T;
     }
 
     async start(): Promise<void> {
