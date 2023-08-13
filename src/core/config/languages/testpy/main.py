@@ -18,6 +18,7 @@ TIME_LIMIT = test_config["time_limit"]
 plugin = JSONReport()
 pytest.main(
     [
+        "-x",
         "-v",
         "-rx",
         "--lf",
