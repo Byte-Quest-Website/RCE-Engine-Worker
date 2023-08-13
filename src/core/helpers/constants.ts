@@ -27,5 +27,5 @@ export const Languages = {
         imageName: "cexe",
         fileName: "/tmp/main.c",
         runScript: "/tmp/run.sh",
-    }
+    },
 } as const;

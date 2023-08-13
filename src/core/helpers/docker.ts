@@ -2,11 +2,7 @@ import { join } from "path";
 import { exec, spawn } from "child_process";
 import { CONFIG_DIR, LANGUAGE_DIR } from "./constants";
 
-import {
-    RunCodeInfo,
-    RunCodeContainerResponse,
-    AsyncExecPromise,
-} from "./types";
+import { RunCodeInfo, ContainerResponse, AsyncExecPromise } from "./types";
 
 async function asyncExecCode(command: string): Promise<AsyncExecPromise> {
     return new Promise(function (resolve, reject) {
@@ -64,7 +60,7 @@ export async function buildImage(
 
 export async function runCodeInContainer(
     data: RunCodeInfo
-): Promise<RunCodeContainerResponse> {
+): Promise<ContainerResponse> {
     const TIME_LIMIT = 5;
     const MEMORY_LIMIT = "25mb";
 
