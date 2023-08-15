@@ -4,5 +4,6 @@ sudo timeout -s SIGKILL $1 \
     --tmpfs /tmp:exec \
     -v "$3:ro" \
     -v "$4:ro" \
-    --name=$5 \
-    "$6" < "$7"
+    -v "$5:ro" \
+    --name=$6 \
+    "$7" < "$8"

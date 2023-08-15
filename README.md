@@ -2,7 +2,7 @@
 
 This proejct containers two workers. These workers are RabbitMQ consumers and will run arbitrary code in a containerized environment and then save the result to the database or cache. It can also test code against provided test cases. All code will be executed in docker containers.
 
-## Whats Included 
+## Whats Included
 
 **You must have docker installed on your system.**
 
@@ -10,7 +10,7 @@ There are two workers included in this project the general worker and test worke
 
 The general worker is for anyone to use. You can provide any code to this worker and it will run it in a containerized enviroment and then return the result. This isn't related to the website that is being made. The container does have some requirements and will be killed if there is too much memory or too much time being spent on it.
 
-The tester worker is meant for the website that I am creating. This worker takes in code and a problem data file. The worker then tests the provied code against the input set and makes sure it returns all the expected results. It will also notify which test case it failed and the reason (eg timeout, memory eror, wrong answer etc). 
+The tester worker is meant for the website that I am creating. This worker takes in code and a problem data file. The worker then tests the provied code against the input set and makes sure it returns all the expected results. It will also notify which test case it failed and the reason (eg timeout, memory eror, wrong answer etc).
 
 **It is recommended that all requests to these workers come through the API.**
 
@@ -21,6 +21,7 @@ Both workers are toggleable by using enviroment variables. This is so that you c
 To use this you must create a `.env` file with the following data. There is an example of the `.env` file in `.env.example`.
 
 The `.env` file will look like this:
+
 ```bash
 DATABASE_URL="" # Database URL (For Prisma)
 
@@ -34,5 +35,5 @@ REDIS_URL="" # URL to the redis database
 ```
 
 Make sure to install all node dependencies with `npm i`.  
-Once complete start the application either in dev mode with `npm run dev`, or build it with `npm run build` and run with `node dist/src/index.js`.   
+Once complete start the application either in dev mode with `npm run dev`, or build it with `npm run build` and run with `node dist/src/index.js`.  
 Also the worker may require you enter your password for running docker or creating tmp files. This prompt might not occur until you have recieved a request so I would suggest running with `sudo` or making a test request before deployment.

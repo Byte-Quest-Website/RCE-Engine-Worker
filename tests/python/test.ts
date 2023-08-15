@@ -47,6 +47,7 @@ async function sendMessages() {
                     code: code,
                     input: inputString,
                     replyBack: true,
+                    enviromentVariables: { TEST: "hey" },
                 });
                 let res: string = await new Promise((resolve) => {
                     const correlationId = uuidv4();

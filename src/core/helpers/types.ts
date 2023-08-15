@@ -40,6 +40,7 @@ export const RunCodeJobValidator = z.object({
     code: z.string(),
     input: z.string(),
     replyBack: z.boolean().default(false),
+    enviromentVariables: z.record(z.string(), z.string()).default({}),
 });
 
 export type RunCodeJob = z.infer<typeof RunCodeJobValidator>;
@@ -50,6 +51,9 @@ export type RunCodeInfo = {
 
     runFileSrc: string;
     runFileDes: string;
+
+    envFileSrc: string;
+    envFileDes: string;
 
     inputFileSrc: string;
 

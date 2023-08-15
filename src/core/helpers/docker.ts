@@ -74,8 +74,9 @@ export async function runCodeInContainer(
 
     const volume1 = `${data.codeFileSrc}:${data.codeFileDes}`;
     const volume2 = `${data.runFileSrc}:${data.runFileDes}`;
+    const volume3 = `${data.envFileSrc}:${data.envFileDes}`;
 
-    const command = `bash ${runScript} ${TIME_LIMIT} ${MEMORY_LIMIT} ${volume1} ${volume2} ${data.containerName} ${data.imageName} ${data.inputFileSrc}`;
+    const command = `bash ${runScript} ${TIME_LIMIT} ${MEMORY_LIMIT} ${volume1} ${volume2} ${volume3} ${data.containerName} ${data.imageName} ${data.inputFileSrc}`;
 
     return new Promise((resolve, reject) => {
         const childProcess = spawn(command, { shell: true });

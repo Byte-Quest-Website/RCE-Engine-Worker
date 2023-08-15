@@ -67,34 +67,52 @@ export class GeneralRCEWorker extends Worker implements IWorker {
         job: RunCodeJob,
         callback: (response: ContainerResponse) => any
     ) {
-        const { path, imageName, fileName, runScript } =
-            Languages[job.language];
+        const {
+            path,
+            imageName,
+            fileName,
+            runScript,
+            envFile: envFilePath,
+        } = Languages[job.language];
 
         if (!(await imageExists(imageName))) {
             this.logger.info(`Building Image: ${imageName}`);
             await buildImage(imageName, job.language);
         }
 
+        const envVars = Object.keys(job.enviromentVariables).length
+            ? Object.keys(job.enviromentVariables)
+                  .map(function (key) {
+                      return key + "=" + job.enviromentVariables[key];
+                  })
+                  .join("\n")
+            : "";
+
         const codeFile = await file();
         const inputFile = await file();
+        const envFile = await file();
 
         await fs.writeFile(inputFile.path, job.input, "utf-8");
         await fs.writeFile(codeFile.path, job.code, "utf-8");
+        await fs.writeFile(envFile.path, envVars, "utf-8");
 
         const containerName = `${job.language}_${job.jobID}_${imageName}`;
 
         let response = await runCodeInContainer({
             inputFileSrc: inputFile.path,
             codeFileSrc: codeFile.path,
-            codeFileDes: fileName,
+            envFileSrc: envFile.path,
             runFileSrc: join(path, "run.sh"),
+            codeFileDes: fileName,
             runFileDes: runScript,
+            envFileDes: envFilePath,
             imageName: imageName,
             containerName: containerName,
         });
 
         codeFile.cleanup();
         inputFile.cleanup();
+        envFile.cleanup();
 
         cleanup(containerName);
         return callback.constructor.name === "AsyncFunction"
