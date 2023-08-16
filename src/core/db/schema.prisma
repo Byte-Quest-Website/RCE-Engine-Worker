@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Job {
-  id          String     @id @unique
+  id          String     @id @default(uuid())
   completed   Boolean    @default(false)
   createdAt   DateTime   @default(now()) @map("created_at")
   completedAt DateTime?  @map("completed_at")
@@ -22,9 +22,9 @@ model Job {
 model Problem {
   id             String   @id @default(uuid())
   title          String
-  description    String
+  description    String   @default("")
   verified       Boolean  @default(false)
-  tests          Json?
+  tests          Json     @default("[]")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt
   timeLimit      Int      @map("time_limit")
