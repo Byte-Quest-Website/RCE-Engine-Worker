@@ -104,13 +104,18 @@ export class TestCodeWorker extends Worker implements IWorker {
         job: TestCodeJob,
         response: ContainerResponse
     ) {
-        let data = {
+        let data: {
+            completed: boolean;
+            completedAt: Date;
+            success: boolean;
+            report?: Prisma.JsonObject;
+        } = {
             completed: true,
             completedAt: new Date(),
             success: true,
         };
 
-        if (response.exitCode != 0 || response.stdout === "") {
+        if (response.exitCode !== 0 || response.stdout === "") {
             data.success = false;
         }
 
@@ -123,7 +128,10 @@ export class TestCodeWorker extends Worker implements IWorker {
             data.success = false;
         }
 
-        if (container_parsed_res["success"] !== true) {
+        if (
+            container_parsed_res === undefined ||
+            container_parsed_res["success"] !== true
+        ) {
             data.success = false;
         }
 
@@ -135,16 +143,15 @@ export class TestCodeWorker extends Worker implements IWorker {
             });
         }
 
+        if (data.success) {
+            data.report = container_parsed_res as Prisma.JsonObject;
+        }
+
         await prisma.job.update({
             where: {
                 id: job.jobID,
             },
-            data: {
-                completed: true,
-                completedAt: new Date(),
-                report: container_parsed_res as Prisma.JsonObject,
-                success: true,
-            },
+            data: data,
         });
     }
 }
