@@ -80,6 +80,7 @@ export class TestCodeWorker extends Worker implements IWorker {
         const containerName = `python_${job.jobID}_testpy`;
         const data: TestCodeData = JSON.parse(job.data);
         const timeLimit = data.time_limit * data.tests.length + 10; // extra 10sec just incase
+        const memoryLimit = data.memory_limit + 35; // because pytest takes ~35mb for some reason;
         let response = await TestCodeInContainer(
             {
                 codeFileSrc: codeFile.path,
@@ -87,7 +88,7 @@ export class TestCodeWorker extends Worker implements IWorker {
                 containerName,
             },
             timeLimit,
-            `${data.memory_limit}mb`
+            `${memoryLimit}mb`
         );
 
         codeFile.cleanup();
