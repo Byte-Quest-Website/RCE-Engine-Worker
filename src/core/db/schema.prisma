@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Job {
-  id          String     @id @default(uuid())
+  id          String     @id @unique
   completed   Boolean    @default(false)
   createdAt   DateTime   @default(now()) @map("created_at")
   completedAt DateTime?  @map("completed_at")
@@ -20,21 +20,32 @@ model Job {
 }
 
 model Problem {
-  id             String   @id @default(uuid())
+  id             String     @id @default(uuid())
   title          String
-  description    String   @default("")
-  verified       Boolean  @default(false)
-  tests          Json     @default("[]")
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt
-  timeLimit      Int      @map("time_limit")
-  functionName   String   @map("function_name")
-  memoryLimit    Int      @map("memory_limit ")
-  parameterNames String[] @map("parameter_names")
-  user           User     @relation(fields: [userId], references: [id])
+  description    String
+  verified       Boolean    @default(false)
+  tests          Json?
+  solutionLink   String?    @map("solution_link")
+  likes          Int        @default(0)
+  dislikes       Int        @default(0)
+  difficulty     Difficulty
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+  timeLimit      Int        @map("time_limit")
+  functionName   String     @map("function_name")
+  memoryLimit    Int        @default(15) @map("memory_limit")
+  parameterNames String[]   @map("parameter_names")
+  user           User       @relation(fields: [userId], references: [id])
   userId         String
+  Solution       Solution[]
 
   @@map("problems")
+}
+
+enum Difficulty {
+  EASY
+  MEDUIUM
+  HARD
 }
 
 model Solution {
@@ -47,22 +58,27 @@ model Solution {
   userId     String
   job        Job      @relation(fields: [jobId], references: [id])
   jobId      String
+  problem    Problem  @relation(fields: [problemId], references: [id])
+  problemId  String
 
   @@map("solutions")
 }
 
 model User {
-  id            String     @id @default(uuid())
-  name          String
-  email         String?    @unique
-  emailVerified DateTime?  @map("email_verified")
-  image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  Problem       Problem[]
-  Solution      Solution[]
+  id               String     @id @default(uuid())
+  name             String
+  score            Int        @default(0)
+  likedProblems    String[]   @default([])
+  dislikedProblems String[]   @default([])
+  email            String?    @unique
+  emailVerified    DateTime?  @map("email_verified")
+  image            String?
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+  accounts         Account[]
+  sessions         Session[]
+  Problem          Problem[]
+  Solution         Solution[]
 
   @@map("users")
 }
@@ -109,4 +125,5 @@ model VerificationRequest {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
+  @@map("verification_requests")
 }
