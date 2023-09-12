@@ -134,18 +134,26 @@ export class TestCodeWorker extends Worker implements IWorker {
             container_parsed_res["success"] !== true
         ) {
             data.success = false;
+            data.report = {
+                success: true,
+                outcome: "fail",
+                reason: "idk",
+                stderr: response.stderr,
+            };
         }
 
         if (response.outOfMemory) {
-            response.stdout = JSON.stringify({
+            data.report = {
                 success: true,
                 outcome: "fail",
                 reason: "Failed: Out Of Memory",
-            });
+                stderr: response.stderr,
+            };
         }
 
         if (data.success) {
             data.report = container_parsed_res as Prisma.JsonObject;
+            data.report.stderr = response.stderr;
         }
 
         await prisma.job.update({
