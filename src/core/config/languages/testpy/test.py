@@ -22,4 +22,8 @@ with open(PATH) as f:
 @pytest.mark.parametrize("testcase, expected", data["tests"])
 def test_function(testcase: list[Any], expected: Any) -> None:
     func: Callable[..., Any] = getattr(code, data["function_name"])
-    assert func(*testcase) == expected
+    value_from_code = func(*testcase)
+
+    assert (
+        value_from_code == expected
+    ), f"Expected {repr(expected)}, but got {repr(value_from_code)}"

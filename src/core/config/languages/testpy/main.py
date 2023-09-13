@@ -54,14 +54,18 @@ def main() -> None:
         if test["outcome"] != "failed":
             continue
 
+        assertion_reason = None
         reason = test["call"]["crash"]["message"]
         if test["call"]["traceback"][0]["message"] == "AssertionError":
+            error_message = test["call"]["crash"]["message"]
+            assertion_reason = str(error_message).removeprefix("AssertionError: ")
             reason = "AssertionError"
 
         data["outcome"] = "fail"
         data["reason"] = reason
         data["fail_number"] = idx
         data["total_cases"] = len(TEST_CASES)
+        data["assertion_reason"] = assertion_reason
 
         return write_result(data)
 
